@@ -46,8 +46,28 @@ class PerceptronClassifierPacman(PerceptronClassifier):
         # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
         # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
 
+
+        # ({'West': {'foodCount': 95}, 'East': {'foodCount': 96}, 'Stop': {'foodCount': 96}}, ['West', 'Stop', 'East'])
+
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
-            for i in range(len(trainingData)):
+            for i in range(len(trainingData)): #data = states 
                 "*** YOUR CODE HERE ***"
-                util.raiseNotDefined()
+                update = util.Counter()
+                actions = trainingData[i][1]
+                features = trainingData[i][0]
+                for action in actions:
+                    feature = features[action]
+                    keys = feature.sortedKeys()
+                    for key in keys:
+                        update[action] += self.weights[key]*feature[key]
+                maxaction = update.argMax()
+                if (maxaction == trainingLabels[i]):
+                    continue
+                
+                maxfeat = features[maxaction]
+                for key in maxfeat.sortedKeys():
+                    self.weights[key] += features[trainingLabels[i]][key] - maxfeat[key]
+
+
+ 
