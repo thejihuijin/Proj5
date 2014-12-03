@@ -53,23 +53,17 @@ class PerceptronClassifierPacman(PerceptronClassifier):
             print "Starting iteration ", iteration, "..."
             for i in range(len(trainingData)): #data = states 
                 "*** YOUR CODE HERE ***"
-                update = util.Counter()
-                actions = trainingData[i][1]
-                features = trainingData[i][0]
-                for action in actions:
-                    feature = features[action]
-                    update[action] = self.weights*feature
-                maxaction = update.argMax()
+                maxaction, maxscore = None, None
+                actions = trainingData[i][0]
+                for current_action in actions:
+                    current_score = self.weights * actions[current_action]
+                    if maxaction is None or current_score > maxscore:
+                        maxaction = current_action
+                        maxscore = current_score
+
                 if (maxaction == trainingLabels[i]):
                     continue
-                
-                self.weights += features[trainingLabels[i]]
-                self.weights -= features[maxaction]
-                #print(str(key) + " prev weight: " + str(self.weights[key]))
-                #print("added: " + str(trainingLabels[i]) +" " + str(features[trainingLabels[i]][key])) 
-                #print("sub: " + str(maxaction) + " " + str(maxfeat[key]))  
-            
-                #print(str(key) + ": " + str(self.weights[key]))
 
-
+                self.weights += actions[trainingLabels[i]]
+                self.weights -= actions[maxaction]
  
