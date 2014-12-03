@@ -62,7 +62,7 @@ class QLearningAgent(ReinforcementAgent):
         """
         "*** YOUR CODE HERE ***"
         actions = self.getLegalActions(state)
-        return 0.0 if not actions else max([self.qVals[(state,action)] for action in actions])
+        return 0.0 if not actions else max([self.getQValue(state,action) for action in actions])
 
     def computeActionFromQValues(self, state):
         """
@@ -71,17 +71,17 @@ class QLearningAgent(ReinforcementAgent):
           you should return None.
         """
         "*** YOUR CODE HERE ***"
+        actions = self.getLegalActions(state)
+        #print("actions: " + str(actions))
         if not actions: return None
 
         # bit janky for randomizing max action
         actCount = util.Counter()
         for action in actions:
-            actCount[action] = self.qVals[(state,action)]
+            actCount[action] = self.getQValue(state,action)
         sortedActs = actCount.sortedKeys()
-        maxQval = self.qVals[(state,sortedActs[0])]
-        i = 0
-        finalActs = []
-        return random.choice([action for action in actions if self.qVals[(state,action)] == maxQval])
+        maxQval = self.getQValue(state,sortedActs[0])
+        return random.choice([action for action in actions if self.getQValue(state,action) == maxQval])
 
     def getAction(self, state):
         """
@@ -115,8 +115,8 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        sample = reward + self.discount*self.qVals[(nextState,self.computeActionFromQValues(nextState))]
-        self.qVals[(state,action)] = (1-self.alpha)*self.qVals[(state,action)] + self.alpha*sample
+        sample = reward + self.discount*self.getQValue(nextState,self.computeActionFromQValues(nextState))
+        self.qVals[(state,action)] = (1-self.alpha)*self.getQValue(state,action) + self.alpha*sample
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -148,9 +148,9 @@ class PacmanQAgent(QLearningAgent):
 
     def getAction(self, state):
         """
-        Simply calls the getAction method of QLearningAgent and then
+        Simply calls the getAction method of QLearningAgent and then<D-9><D-9>
         informs parent of action for Pacman.  Do not change or remove this
-        method.
+        method. 
         """
         action = QLearningAgent.getAction(self,state)
         self.doAction(state,action)
@@ -179,14 +179,22 @@ class ApproximateQAgent(PacmanQAgent):
           where * is the dotProduct operator
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        feat = self.featExtractor.getFeatures(state,action)
+        return sum([self.weights[key]*feat[key] for key in feat.sortedKeys()])
 
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        feat = self.featExtractor.getFeatures(state,action)
+        bestaction = self.computeActionFromQValues(nextState)
+        if bestaction:
+            difference = reward + self.discount*self.getQValue(nextState,bestaction) - self.getQValue(state,action)
+        else:
+            difference = reward - self.getQValue(state,action)
+        for key in feat.sortedKeys():
+            self.weights[key] += self.alpha*difference*feat[key]
 
     def final(self, state):
         "Called at the end of each game."
