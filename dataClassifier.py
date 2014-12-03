@@ -1,4 +1,5 @@
 # dataClassifier.py
+
 # -----------------
 # Licensing Information:  You are free to use or extend these projects for
 # educational purposes provided that (1) you do not distribute or publish
@@ -188,24 +189,18 @@ def enhancedPacmanFeatures(state, action):
     # distance to closest food
     # capsule distances
     # closest capsule
-
+    state = state.generateSuccessor(0, action)
     curPos = state.getPacmanPosition()
     foodCounter = util.Counter()
     foodList = state.getFood().asList()
     if foodList:
         for food in foodList:
             foodCounter[food] = util.manhattanDistance(curPos,food)
-            #print(str(food) + ": " + str(foodCounter[food]))
         closest = foodCounter.sortedKeys()[-1]
         features['closestFood'] = 1/foodCounter[closest]
-        #print(features['closestFood'])
     else: 
         features['closestFood'] = 1
     features['numFood'] = state.getNumFood()
-    #print('numfood:' + str(state.getNumFood()))
-
-
-
     return features
 
 
