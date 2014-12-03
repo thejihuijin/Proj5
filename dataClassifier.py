@@ -191,6 +191,7 @@ def enhancedPacmanFeatures(state, action):
     # closest capsule
     state = state.generateSuccessor(0, action)
     curPos = state.getPacmanPosition()
+    ghostCounter = util.Counter()
     foodCounter = util.Counter()
     foodList = state.getFood().asList()
     if foodList:
@@ -201,6 +202,23 @@ def enhancedPacmanFeatures(state, action):
     else: 
         features['closestFood'] = 1
     features['numFood'] = state.getNumFood()
+
+    ghostList = state.getGhostPositions()
+    ghostNo = 0
+    if ghostList:
+        for ghost in ghostList:
+            ghostNo += 1
+            ghostCounter[ghost] = util.manhattanDistance(curPos, ghost)
+            if ghostCounter[ghost] < 4:
+                features['ghost' + str(ghostNo)] = 1 
+            closestGhost = ghostCounter.sortedKeys()[-1]
+            if ghostCounter[closestGhost] != 0:
+                features['closestGhost'] = ghostCounter[closestGhost]
+        else:
+            features['closestGhost'] = 1
+
+    for capsule in state.getCapsules():
+        features[('capsule', capsule)] = 1
     return features
 
 
