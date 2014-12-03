@@ -184,7 +184,26 @@ def enhancedPacmanFeatures(state, action):
     It should return a counter with { <feature name> : <feature value>, ... }
     """
     features = util.Counter()
-    "*** YOUR CODE HERE ***"
+    # distance to closest ghost
+    # distance to closest food
+    # capsule distances
+    # closest capsule
+
+    curPos = state.getPacmanPosition()
+    foodCounter = util.Counter()
+    foodList = state.getFood().asList()
+    if foodList:
+        for food in foodList:
+            foodCounter[food] = util.manhattanDistance(curPos,food)
+            #print(str(food) + ": " + str(foodCounter[food]))
+        closest = foodCounter.sortedKeys()[-1]
+        features['closestFood'] = 1/foodCounter[closest]
+        #print(features['closestFood'])
+    else: 
+        features['closestFood'] = 1
+    features['numFood'] = state.getNumFood()
+    #print('numfood:' + str(state.getNumFood()))
+
     return features
 
 
