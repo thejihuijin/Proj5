@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -23,6 +23,8 @@ import samples
 import sys
 import util
 from pacman import GameState
+
+import math
 
 TEST_SET_SIZE = 100
 DIGIT_DATUM_WIDTH=28
@@ -71,16 +73,76 @@ def enhancedFeatureExtractorDigit(datum):
     for this datum (datum is of type samples.Datum).
 
     ## DESCRIBE YOUR ENHANCED FEATURES HERE...
+    > Count the number of nonzero pixels
+    > Count the number of breaks (breakCounter)
+    > Calculate the aspectRatio of the digits
+    > Percentage of activePixels above the horizontal and right of the vertical center lines
 
+    Currently hitting 84%. Overthought this. Forgive me.
     ##
     """
     features =  basicFeatureExtractorDigit(datum)
 
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pixels = datum.getPixels()
+    breakCounter = 0
+    firstLeft, firstTop = None, None
+    aboveCenter, pastRight = 0, 0
+    columnCount, nonzeroPixels = 0, 0
+    while columnCount < len(pixels):
+        flag = False
+        row = pixels[columnCount]
+        rowCount = 1
+        while rowCount < len(row):
+            if row[rowCount] != 0:
+                nonzeroPixels += 1
+                if not firstLeft or rowCount < firstLeft:
+                    firstLeft = rowCount
+                if rowCount <= (len(pixels) + 1) / 2:
+                    aboveCenter += 1
+            if row[rowCount] != row[rowCount - 1]:
+                breakCounter += 1
+            rowCount += 1
+        columnCount += 1
 
+    width = len(pixels[0]) - (firstLeft * 2)
+    rowCount = 0
+    while rowCount < len(pixels[0]):
+        flag = False
+        col = [p[rowCount] for p in pixels]
+        columnCount = 1
+        while columnCount < len(col):
+            if col[rowCount] != 0:
+                nonzeroPixels += 1
+                if not firstTop or columnCount < firstTop:
+                    firstTop = columnCount
+                if columnCount <= (len(pixels[0]) + 1) / 2:
+                    pastRight += 1
+            if col[columnCount] != row[columnCount - 1]:
+                breakCounter += 1
+            columnCount += 1
+        rowCount += 1
+
+    height = len(pixels) - (firstTop * 2)
+    aspectRatio = float(width) / height
+
+    for n in range(5):
+        features[n] = breakCounter > 175 and 1.0 or 0.0
+
+    for n in range(10):
+        features[(n + 1) * 10] = aspectRatio < 0.69
+
+    for n in range(5):
+        features[-n] = nonzeroPixels > 300 and 1.0 or 0.0
+
+    percentAbove = float(aboveCenter) / nonzeroPixels
+    for n in range(5):
+        features[-(n + 1) * 10] = percentAbove > 0.35 and 1.0 or 0.0
+
+    percentRight = float(pastRight) / nonzeroPixels
+    for n in range(1000, 1005):
+        features[n] = percentRight < 0.27 and 1.0 or 0.0
     return features
-
 
 
 def basicFeatureExtractorPacman(state):
@@ -363,7 +425,7 @@ def runClassifier(args, options):
     featureFunction = args['featureFunction']
     classifier = args['classifier']
     printImage = args['printImage']
-    
+
     # Load data
     numTraining = options.training
     numTest = options.test
