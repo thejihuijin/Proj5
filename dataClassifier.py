@@ -134,12 +134,12 @@ def enhancedFeatureExtractorDigit(datum):
 
     for n in range(5):
         features[-n] = nonzeroPixels > 300 and 1.0 or 0.0
-
     percentAbove = float(aboveCenter) / nonzeroPixels
+    
     for n in range(5):
         features[-(n + 1) * 10] = percentAbove > 0.35 and 1.0 or 0.0
-
     percentRight = float(pastRight) / nonzeroPixels
+    
     for n in range(1000, 1005):
         features[n] = percentRight < 0.27 and 1.0 or 0.0
     return features
