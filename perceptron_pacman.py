@@ -58,16 +58,18 @@ class PerceptronClassifierPacman(PerceptronClassifier):
                 features = trainingData[i][0]
                 for action in actions:
                     feature = features[action]
-                    keys = feature.sortedKeys()
-                    for key in keys:
-                        update[action] += self.weights[key]*feature[key]
+                    update[action] = self.weights*feature
                 maxaction = update.argMax()
                 if (maxaction == trainingLabels[i]):
                     continue
                 
-                maxfeat = features[maxaction]
-                for key in maxfeat.sortedKeys():
-                    self.weights[key] += features[trainingLabels[i]][key] - maxfeat[key]
+                self.weights += features[trainingLabels[i]]
+                self.weights -= features[maxaction]
+                #print(str(key) + " prev weight: " + str(self.weights[key]))
+                #print("added: " + str(trainingLabels[i]) +" " + str(features[trainingLabels[i]][key])) 
+                #print("sub: " + str(maxaction) + " " + str(maxfeat[key]))  
+            
+                #print(str(key) + ": " + str(self.weights[key]))
 
 
  
